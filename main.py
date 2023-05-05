@@ -21,7 +21,7 @@ viber = Api(BotConfiguration(
 
 @app.route('/', methods=['POST'])
 def incoming():
-    logger.debug("received request. post data: {0}".format(request.get_data()))
+    # logger.debug("received request. post data: {0}".format(request.get_data()))
     # every viber message is signed, you can verify the signature using this method
     if not viber.verify_signature(request.get_data(), request.headers.get('X-Viber-Content-Signature')):
         return Response(status=403)
@@ -48,5 +48,6 @@ viber.set_webhook('https://volleyball87bot.onrender.com')
 
 if __name__ == "__main__":
     context = ('server.crt', 'server.key')
-    app.run(host='0.0.0.0', port=443, debug=True, ssl_context=context)
+    # app.run(host='0.0.0.0', port=443, debug=True, ssl_context=context)
+    app.run(port=443, debug=True)
 
