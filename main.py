@@ -1,4 +1,4 @@
-from flask import Flask, request, Response
+'''from flask import Flask, request, Response
 from viberbot import Api
 from viberbot.api.bot_configuration import BotConfiguration
 from viberbot.api.messages.text_message import TextMessage
@@ -66,3 +66,15 @@ if __name__ == "__main__":
 
     context = ('server.crt', 'server.key')
     app.run(host='0.0.0.0', port=8443, debug=True, ssl_context=context)
+    app.run(port=8443)
+'''
+from flask import Flask
+
+app = Flask(__name__)
+
+@app.route('/')
+def build():
+    return 'Flask is running'
+
+if __name__ == "__main__":
+    app.run(port='0.0.0.0')
