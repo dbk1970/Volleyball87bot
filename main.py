@@ -77,4 +77,4 @@ def build():
     return 'Flask is running'
 
 if __name__ == "__main__":
-    app.run(port='0.0.0.0')
+    app.run(port='216.24.57.253')
