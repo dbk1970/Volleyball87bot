@@ -1,4 +1,4 @@
-'''from flask import Flask, request, Response
+from flask import Flask, request, Response
 from viberbot import Api
 from viberbot.api.bot_configuration import BotConfiguration
 from viberbot.api.messages.text_message import TextMessage
@@ -22,7 +22,7 @@ logger.addHandler(handler)
 
 app = Flask(__name__)
 viber = Api(BotConfiguration(
-    name='Volleyball87bot',
+    name='Volleyball78bot',
     avatar='V200W.png',
     auth_token='50ee0ec538a7dc83-f5d7265684ea6499-2995774239081905'
 ))
@@ -32,8 +32,8 @@ viber = Api(BotConfiguration(
 def incoming():
     logger.debug("received request. post data: {0}".format(request.get_data()))
     # every viber message is signed, you can verify the signature using this method
-    # if not viber.verify_signature(request.get_data(), request.headers.get('X-Viber-Content-Signature')):
-    #     return Response(status=403)
+    if not viber.verify_signature(request.get_data(), request.headers.get('X-Viber-Content-Signature')):
+        return Response(status=403)
 
     # this library supplies a simple way to receive a request object
     viber_request = viber.parse_request(request.get_data().decode('utf8'))
@@ -56,7 +56,8 @@ def incoming():
     return Response(status=200)
 
     def set_webhook(viber):
-        viber.set_webhook('https://volleyball87bot.onrender.com:8443/')
+        viber.set_webhook('https://volleyball78bot.onrender.com:8443/')
+
 
 if __name__ == "__main__":
     scheduler = sched.scheduler(time.time, time.sleep)
@@ -67,6 +68,8 @@ if __name__ == "__main__":
     context = ('server.crt', 'server.key')
     app.run(host='0.0.0.0', port=8443, debug=True, ssl_context=context)
     app.run(port=8443)
+
+
 '''
 from flask import Flask
 
@@ -78,3 +81,4 @@ def build():
 
 if __name__ == "__main__":
     app.run()
+'''
