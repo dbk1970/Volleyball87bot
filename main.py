@@ -46,11 +46,13 @@ def incoming():
     return Response(status=200)
 
 
-viber.set_webhook('https://volleyball78bot.onrender.com:443/')
+
 
 
 if __name__ == "__main__":
     context = ('server.crt', 'server.key')
     app.run(host='0.0.0.0', port=443, debug=True)
+
+    viber.set_webhook('https://volleyball78bot.onrender.com:443/')
 
 
