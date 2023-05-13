@@ -12,6 +12,7 @@ from viberbot.api.viber_requests import ViberSubscribedRequest
 from viberbot.api.viber_requests import ViberUnsubscribedRequest
 
 
+
 app = Flask(__name__)
 viber = Api(BotConfiguration(
     name='Volleyball78bot',
@@ -22,6 +23,7 @@ viber = Api(BotConfiguration(
 
 @app.route('/', methods=['POST'])
 def incoming():
+    logger = logging.getLogger()
     logger.debug("received request. post data: {0}".format(request.get_data()))
     # every viber message is signed, you can verify the signature using this method
     if not viber.verify_signature(request.get_data(), request.headers.get('X-Viber-Content-Signature')):
