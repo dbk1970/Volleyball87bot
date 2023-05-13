@@ -55,8 +55,9 @@ def incoming():
 
     return Response(status=200)
 
-    def set_webhook(viber):
-        viber.set_webhook('https://volleyball78bot.onrender.com:8443/')
+
+def set_webhook(viber):
+    viber.set_webhook('https://volleyball78bot.onrender.com:8443/')
 
 
 if __name__ == "__main__":
