@@ -39,7 +39,9 @@ def incoming():
     viber_request = viber.parse_request(request.get_data().decode('utf8'))
 
     if isinstance(viber_request, ViberMessageRequest):
-        message = str(viber_request.sender.id)
+        message = viber_request.message
+        print(message)
+        # message.text = (str(viber_request.sender.id)
         # lets echo back
         viber.send_messages(viber_request.sender.id, [
                message
