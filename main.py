@@ -40,7 +40,7 @@ def incoming():
 
     if isinstance(viber_request, ViberMessageRequest):
         message = viber_request.message
-        print('первая   ', message[3])
+        print('первая   ', message), type(message)
         print('вторая   ', viber_request.sender.id)
         # lets echo back
         viber.send_messages(viber_request.sender.id, [
