@@ -19,14 +19,20 @@ viber = Api(BotConfiguration(
     avatar='V200W.png',
     auth_token='50ee0ec538a7dc83-f5d7265684ea6499-2995774239081905'
 ))
-
+logger = logging.getLogger()
+logger.setLevel(logging.DEBUG)
+handler = logging.StreamHandler()
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+handler.setFormatter(formatter)
+logger.addHandler(handler)
 
 @app.route('/', methods=['POST'])
 def incoming():
-    logger = logging.getLogger()
+
     logger.debug("received request. post data: {0}".format(request.get_data()))
     # every viber message is signed, you can verify the signature using this method
     if not viber.verify_signature(request.get_data(), request.headers.get('X-Viber-Content-Signature')):
+        print(viber.verify_signature(request.get_data(), request.headers.get('X-Viber-Content-Signature')))
         return Response(status=403)
 
     # this library supplies a simple way to receive a request object
@@ -36,7 +42,7 @@ def incoming():
         message = viber_request.message
         # lets echo back
         viber.send_messages(viber_request.sender.id, [
-               message
+               message, viber_request.sender.id
             ])
     elif isinstance(viber_request, ViberSubscribedRequest):
         viber.send_messages(viber_request.get_user.id, [
