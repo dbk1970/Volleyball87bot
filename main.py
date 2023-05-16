@@ -16,7 +16,7 @@ from viberbot.api.viber_requests import ViberUnsubscribedRequest
 app = Flask(__name__)
 viber = Api(BotConfiguration(
     name='Volleyball78bot',
-    avatar='V200W.png',
+    avatar='mikasa_or_molten.jpg',
     auth_token='50ee0ec538a7dc83-f5d7265684ea6499-2995774239081905'
 ))
 logger = logging.getLogger()
@@ -40,8 +40,6 @@ def incoming():
 
     if isinstance(viber_request, ViberMessageRequest):
         message = viber_request.message
-        print('первая   ', message, type(message))
-        print('вторая   ', viber_request.sender.id)
         # lets echo back
         viber.send_messages(viber_request.sender.id, [
                message, TextMessage(text=str(viber_request.sender.id))
