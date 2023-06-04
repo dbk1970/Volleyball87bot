@@ -27,6 +27,7 @@ handler.setFormatter(formatter)
 logger.addHandler(handler)
 
 my_config: Any = MyConfig()
+my_config = get_config(PATH_SET)
 
 @app.route('/', methods=['POST'])
 def incoming():
@@ -47,14 +48,9 @@ def incoming():
             incoming_id = message['receiver']
             output_ids, output_msg = incoming_parsing(incoming_id, incoming_text)
             for receiver_id in output_ids:
-                # viber_request.sender.id = receiver_id
-                # viber.send_messages(viber_request.sender.id, [
-                #     message, TextMessage(text=str(viber_request.sender.id))
-                # ])
                 viber.send_messages(receiver_id, [
                     TextMessage(text=output_msg)
                 ])
-            my_config = output_my_config
         else:
             # если не текст, то просто эхо отвечает
             viber.send_messages(viber_request.sender.id, [
