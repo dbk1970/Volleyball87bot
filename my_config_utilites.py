@@ -220,7 +220,7 @@ if __name__ == "__main__":
     c = 'Aleksey'
     e = incoming_parsing(b, c)
     e = incoming_parsing(b, c)
-    b = '4444444444444-444-444='
+    b = '4444444444444-444-444='    
     c = 'Valera'
     e = incoming_parsing(b, c)
     e = incoming_parsing(b, c)
