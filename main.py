@@ -26,8 +26,6 @@ formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(messag
 handler.setFormatter(formatter)
 logger.addHandler(handler)
 
-my_config: Any = MyConfig()
-my_config = get_config(PATH_SET)
 
 @app.route('/', methods=['POST'])
 def incoming():

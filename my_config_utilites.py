@@ -5,7 +5,8 @@ from dataclasses import dataclass, field
 import os
 import json
 
-from main import *
+# from main import *
+
 
 PATH_SET = "settings.json"
 NAME_BOT = 'Volleyball78bot'
@@ -60,6 +61,7 @@ class MyConfig:
         self.number_team_members = my_config_json['number_team_members']
         self.vip_team_members = my_config_json['vip_team_members']
 
+
 def create_config(path: str):
     """
     Create a config file
@@ -89,7 +91,7 @@ def get_config_dict(path: str) -> dict:
             config = json.load(settings_file)
     return config
 
-def get_config(path: str) -> MyConfig:
+def get_config(path: str):
     """
     Returns the config object
     """
@@ -102,7 +104,7 @@ def get_config(path: str) -> MyConfig:
     my_config.team_members = config["team_members"]
     my_config.number_team_members = int(config['number_team_members'])
     my_config.vip_team_members = config['vip_team_members']
-    return my_config
+
 
 
 def update_config(path: str, config: MyConfig):
@@ -211,6 +213,10 @@ def table_game_team(date: str):
             table_list += DICT_MENU['in_reserve']+ '\n '
         table_list += str(i+1)+ ' : ' + my_config.team_members[my_config.voting_members[date][i]]+'\n '
     return table_list, print(table_list)
+
+
+my_config: Any = MyConfig()
+get_config(PATH_SET)
 
 
 if __name__ == "__main__":
