@@ -4,42 +4,61 @@ from typing import Any, List
 from dataclasses import dataclass, field
 import os
 import json
-# from main import *
+
+from main import *
 
 PATH_SET = "settings.json"
 NAME_BOT = 'Volleyball78bot'
 AVATAR_BOT = 'mikasa_or_molten.jpg'
 AUTH_TOKEN = '50ee0ec538a7dc83-f5d7265684ea6499-2995774239081905'
-DICT_MENU = {'team_log':'Представьтесь! (напишите имя под которым вас будут узнавать в списке игроков)',
+DICT_MENU = {'team_log': 'Представьтесь! (напишите имя под которым вас будут узнавать в списке игроков. '
+                         'К примеру - свое имя и первые 1-3 буквы фамилии)',
              'team_unlog': 'Вы удалены из списка голосования',
-             'team_loggin': 'Вы записаны в команду под именем ',
-
-            }
-
-DAY_OF_THE_WEEK_DEFAULT = 2
-VOTING_TIME_DEFAULT = '12:00:00'
+             'team_login': 'Вы записаны в команду под именем ',
+             'brief_instructions':'Краткие инструкции по общению с ботом: \n'
+                                  '+ - запись на игру \n'
+                                  '- - отказаться от игры (если записались ранее) \n'
+                                  '? - получить список сегодняшней команды',
+             'team_member_allready_exist': 'Вы уже записаны на игру ',
+             'out_of_time': 'Сегодня нет игры',
+             'team_allready_exist': 'Команда сформирована! На сегодня вы - в запасе.',
+             'team_welcome': 'Вы зарегистрированы! Добро пожаловать на игру!',
+             'remove_from_team': 'Вы отписаны от игры сегодня!',
+             'in_reserve': 'В запасе:',
+             }
+VIP_TEAM_MEMBERS = ['3333333333333-333-333=', '4444444444444-444-444=']
+DAY_OF_THE_WEEK_DEFAULT = [1, 5] # 2,5
+VOTING_TIME_DEFAULT = '07:00:00'
+NUMBERS_TEAM_MEMBERS = 6  # 14
 TEAM_DICT_DEFAULT = {'5h2COTj83ZE6IAsIcTEVGw==': 'DK'}
 VOTING_MEMBERS = {}
 CONFIG_DEFAULT = {"day_of_the_week": DAY_OF_THE_WEEK_DEFAULT,
-                      "voting_time": VOTING_TIME_DEFAULT,
-                      "team_members": TEAM_DICT_DEFAULT,
-                      'voting_members': VOTING_MEMBERS
-                      }
+                  "voting_time": VOTING_TIME_DEFAULT,
+                  "team_members": TEAM_DICT_DEFAULT,
+                  'voting_members': VOTING_MEMBERS,
+                  'number_team_members': NUMBERS_TEAM_MEMBERS,
+                  'vip_team_members': VIP_TEAM_MEMBERS,
+                  }
+
 
 @dataclass
 class MyConfig:
-    day_of_the_week: int = 0
+    day_of_the_week: List[int] = field(default_factory=list)
     voting_time: str = ''
     team_members: dict = field(default_factory=dict)
     voting_members: dict = field(default_factory=dict)
+    number_team_members: int = 14
+    vip_team_members: List[str] = field(default_factory=list)
+
 
     def __post_init__(self):
-        my_config_json = get_config(PATH_SET)
+        my_config_json = get_config_dict(PATH_SET)
         self.day_of_the_week = my_config_json['day_of_the_week']
         self.voting_time = my_config_json['voting_time']
         self.team_members = my_config_json['team_members']
         self.voting_members = my_config_json['voting_members']
-
+        self.number_team_members = my_config_json['number_team_members']
+        self.vip_team_members = my_config_json['vip_team_members']
 
 def create_config(path: str):
     """
@@ -52,9 +71,9 @@ def create_config(path: str):
         json.dump(config_default, settings_file)
 
 
-def get_config(path: str) -> MyConfig:
+def get_config_dict(path: str) -> dict:
     """
-    Returns the config object
+    Returns the config dict
     """
     if not os.path.exists(path):
         create_config(path)
@@ -68,13 +87,22 @@ def get_config(path: str) -> MyConfig:
         create_config(path)
         with open(PATH_SET) as settings_file:
             config = json.load(settings_file)
-    # finally:
-    #         g = config['voting_time'].split(':')
-    #         #  переводим "время голосования" в формат datetime
-    #         config['voting_time'] = time(int(g[0]), int(g[1]), int(g[2]))
-    #         #  переводим "время голосования" в формат datetime
-
     return config
+
+def get_config(path: str) -> MyConfig:
+    """
+    Returns the config object
+    """
+    config = get_config_dict(path)
+    # переводим из dict в объект
+    my_config = MyConfig()
+    my_config.day_of_the_week = config["day_of_the_week"]
+    my_config.voting_time = config["voting_time"]
+    my_config.voting_members = config["voting_members"]
+    my_config.team_members = config["team_members"]
+    my_config.number_team_members = int(config['number_team_members'])
+    my_config.vip_team_members = config['vip_team_members']
+    return my_config
 
 
 def update_config(path: str, config: MyConfig):
@@ -82,10 +110,12 @@ def update_config(path: str, config: MyConfig):
     Update a settings config
     """
     my_config = CONFIG_DEFAULT
-    my_config["day_of_the_week"] = config.day_of_the_week
-    my_config["voting_time"] = config.voting_time
-    my_config["voting_members"] = config.voting_members
-    my_config["team_members"] = config.team_members
+    my_config['day_of_the_week'] = config.day_of_the_week
+    my_config['voting_time'] = config.voting_time
+    my_config['voting_members'] = config.voting_members
+    my_config['team_members'] = config.team_members
+    my_config['number_team_members'] = config.number_team_members
+    my_config['vip_team_members'] = config.vip_team_members
     with open(path, "w") as settings_file:
         json.dump(my_config, settings_file)
 
@@ -101,29 +131,130 @@ def delete_setting(path, section, setting):
 
 
 def incoming_parsing(incoming_id: str, incoming_text: str):
-    if incoming_id not in my_config.team_members:#проверяем на наличие id в списке команды
-        my_config.team_members[incoming_id] = ''
-        incoming_text = DICT_MENU['team_log']
+    """
+    Incoming message processing
+    """
+    outcoming_id = incoming_id
+    outcoming_text = ''
+    if incoming_text.strip()[0] == '@':
+        outcoming_id, outcoming_text = admin_utilites(incoming_id, incoming_text)
     else:
-        if my_config.team_members[incoming_id] == '':#проверяем на наличие имени в списке команды
-            my_config.team_members[incoming_id] = incoming_text
-            incoming_text = DICT_MENU['team_login'] + incoming_text
-        else:#все выше пройдено - читаем меседж
-            g = config['voting_time'].split(':')#временная переменная для разделения времени
-            if datetime.datetime.isoweekday(datetime.datetime.now()) == my_config.day_of_the_week:
-                if datetime.time.now().time() > time(int(g[0]), int(g[1]), int(g[2])):
-                    if '+' in incoming_text and len(incoming_text) < 5:
-                        my_config.voting_members[
-                            datetime.date.strftime(datetime.datetime.now(), '%d-%m-%y')
-                        ].append(incoming_id)
+        # проверяем на наличие id в списке команды
+        if incoming_id not in my_config.team_members:
+            my_config.team_members[incoming_id] = ''
+            outcoming_text = DICT_MENU['team_log']
+        else:
+            # проверяем на наличие имени в списке команды
+            if my_config.team_members[incoming_id] == '':
+                my_config.team_members[incoming_id] = incoming_text
+                outcoming_text = DICT_MENU['team_login'] + incoming_text + '\n' + DICT_MENU['brief_instructions']
+            else:
+                # все выше пройдено - читаем меседж
+                if weekday_is_true() and time_is_true():
+                    date_now = datetime.strftime(datetime.now(), '%d-%m-%y')
+                    if date_now not in my_config.voting_members:
+                        # при первом обращении в нужное время - создаем запись голосующих с внесением первыми VIP
+                        my_config.voting_members[date_now] = []
+                        for vip_members in VIP_TEAM_MEMBERS:
+                            my_config.voting_members[date_now].append(vip_members)
+                    if '+' in incoming_text:
+                        if incoming_id not in my_config.voting_members[date_now]:
+                            my_config.voting_members[date_now].append(incoming_id)
+                            if len(my_config.voting_members[date_now]) > my_config.number_team_members:
+                                outcoming_text = DICT_MENU['team_allready_exist']
+                            else:
+                                outcoming_text = DICT_MENU['team_welcome']
+                        else:
+                            outcoming_text = DICT_MENU['team_member_allready_exist']
+                    if incoming_text == '-' and incoming_id in my_config.voting_members[date_now]:
+                        my_config.voting_members[date_now].remove(incoming_id)
+                        outcoming_text = DICT_MENU['remove_from_team']
+                    if '?' == incoming_text[0]:
+                        outcoming_text = table_game_team(date_now)
+                else:
+                    outcoming_text = DICT_MENU['out_of_time']
+    update_config(PATH_SET, my_config)
+    return outcoming_id, outcoming_text
 
 
+def admin_utilites(incoming_id, incoming_text):
+    """
+    Processing an incoming service message
+    """
+    outcoming_id, outcoming_text = incoming_id, incoming_text
+    return outcoming_id, outcoming_text
 
 
-    update_config(my_config)
-    return incoming_id, incoming_text
+def time_is_true():
+    """
+    Checking for condition compliance by time
+    """
+    t = my_config.voting_time
+    t = t.split(':')
+    return datetime.now().time() > time(int(t[0]), int(t[1]), int(t[2]))
+
+
+def weekday_is_true():
+    """
+    Checking for condition compliance by weekday
+    """
+    return datetime.isoweekday(datetime.now()) in my_config.day_of_the_week
+
+
+def table_game_team(date: str):
+    """
+    Formation of a list table
+    """
+    table_list = ''
+    for i in range(len(my_config.voting_members[date])):
+        if i == my_config.number_team_members:
+            table_list += DICT_MENU['in_reserve']+ '\n '
+        table_list += str(i+1)+ ' : ' + my_config.team_members[my_config.voting_members[date][i]]+'\n '
+    return table_list, print(table_list)
+
 
 if __name__ == "__main__":
     a = MyConfig()
-    print(a, type(a.voting_time))
-    print(a.voting_members)
+
+    b = '3333333333333-333-333='
+    c = 'Aleksey'
+    e = incoming_parsing(b, c)
+    e = incoming_parsing(b, c)
+    b = '4444444444444-444-444='
+    c = 'Valera'
+    e = incoming_parsing(b, c)
+    e = incoming_parsing(b, c)
+
+    b = '8230jakncdnac-657-342='
+    c = 'RL'
+    e = incoming_parsing(b, c)
+    e = incoming_parsing(b, c)
+    print(e, my_config.voting_members)
+    c = '+'
+    e = incoming_parsing(b, c)
+    print(e, my_config.voting_members)
+
+    b = '4344289412118-248-353='
+    c = 'RK'
+    e = incoming_parsing(b, c)
+    e = incoming_parsing(b, c)
+    print(e, my_config.voting_members)
+    c = '+'
+    e = incoming_parsing(b, c)
+    print(e, my_config.voting_members)
+
+
+    b = '5h2COTj83ZE6IAsIcTEVGw=='
+    c = '+'
+    e = incoming_parsing(b, c)
+    print(e, my_config.voting_members, sep='\n')
+    b = '123456789012345678901234'
+    c = 'loh'
+    e = incoming_parsing(b, c)
+    e = incoming_parsing(b, c)
+    c = '+'
+    e = incoming_parsing(b, c)
+    print(e, my_config.voting_members, sep='\n')
+    c = '?'
+    e = incoming_parsing(b, c)
+    print(e, my_config.voting_members, sep='\n')
