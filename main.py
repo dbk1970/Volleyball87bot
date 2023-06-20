@@ -44,15 +44,10 @@ def incoming():
         if message._message_type == 'text':
             incoming_text = message._text
             incoming_id = viber_request.sender.id
-            # output_ids, output_msg = incoming_parsing(incoming_id, incoming_text)
-            # for receiver_id in output_ids:
-            #     viber.send_messages(receiver_id, [
-            #         TextMessage(text=output_msg)
-            #     ])
-            viber.send_messages(incoming_id, [
-                TextMessage(text=str(viber_request.__dict__)),
-                TextMessage(text=str(viber_request.message.__dict__)),
-                    TextMessage(text=str(message.__dict__))
+            output_ids, output_msg = incoming_parsing(incoming_id, incoming_text)
+            for output_id in output_ids:
+                viber.send_messages(output_id, [
+                    TextMessage(text=output_msg)
                 ])
         else:
             # если не текст, то просто эхо отвечает
