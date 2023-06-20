@@ -138,44 +138,44 @@ def incoming_parsing(incoming_id: str, incoming_text: str):
     """
     outcoming_id = incoming_id
     outcoming_text = ''
-    if incoming_text.strip()[0] == '@':
-        outcoming_id, outcoming_text = admin_utilites(incoming_id, incoming_text)
-    else:
-        # проверяем на наличие id в списке команды
-        if incoming_id not in my_config.team_members:
-            my_config.team_members[incoming_id] = ''
-            outcoming_text = DICT_MENU['team_log']
-        else:
-            # проверяем на наличие имени в списке команды
-            if my_config.team_members[incoming_id] == '':
-                my_config.team_members[incoming_id] = incoming_text
-                outcoming_text = DICT_MENU['team_login'] + incoming_text + '\n' + DICT_MENU['brief_instructions']
-            else:
-                # все выше пройдено - читаем меседж
-                if weekday_is_true() and time_is_true():
-                    date_now = datetime.strftime(datetime.now(), '%d-%m-%y')
-                    if date_now not in my_config.voting_members:
-                        # при первом обращении в нужное время - создаем запись голосующих с внесением первыми VIP
-                        my_config.voting_members[date_now] = []
-                        for vip_members in VIP_TEAM_MEMBERS:
-                            my_config.voting_members[date_now].append(vip_members)
-                    if '+' in incoming_text:
-                        if incoming_id not in my_config.voting_members[date_now]:
-                            my_config.voting_members[date_now].append(incoming_id)
-                            if len(my_config.voting_members[date_now]) > my_config.number_team_members:
-                                outcoming_text = DICT_MENU['team_allready_exist']
-                            else:
-                                outcoming_text = DICT_MENU['team_welcome']
-                        else:
-                            outcoming_text = DICT_MENU['team_member_allready_exist']
-                    if incoming_text == '-' and incoming_id in my_config.voting_members[date_now]:
-                        my_config.voting_members[date_now].remove(incoming_id)
-                        outcoming_text = DICT_MENU['remove_from_team']
-                    if '?' == incoming_text[0]:
-                        outcoming_text = table_game_team(date_now)
-                else:
-                    outcoming_text = DICT_MENU['out_of_time']
-    update_config(PATH_SET, my_config)
+    # if incoming_text.strip()[0] == '@':
+    #     outcoming_id, outcoming_text = admin_utilites(incoming_id, incoming_text)
+    # else:
+    #     # проверяем на наличие id в списке команды
+    #     if incoming_id not in my_config.team_members:
+    #         my_config.team_members[incoming_id] = ''
+    #         outcoming_text = DICT_MENU['team_log']
+    #     else:
+    #         # проверяем на наличие имени в списке команды
+    #         if my_config.team_members[incoming_id] == '':
+    #             my_config.team_members[incoming_id] = incoming_text
+    #             outcoming_text = DICT_MENU['team_login'] + incoming_text + '\n' + DICT_MENU['brief_instructions']
+    #         else:
+    #             # все выше пройдено - читаем меседж
+    #             if weekday_is_true() and time_is_true():
+    #                 date_now = datetime.strftime(datetime.now(), '%d-%m-%y')
+    #                 if date_now not in my_config.voting_members:
+    #                     # при первом обращении в нужное время - создаем запись голосующих с внесением первыми VIP
+    #                     my_config.voting_members[date_now] = []
+    #                     for vip_members in VIP_TEAM_MEMBERS:
+    #                         my_config.voting_members[date_now].append(vip_members)
+    #                 if '+' in incoming_text:
+    #                     if incoming_id not in my_config.voting_members[date_now]:
+    #                         my_config.voting_members[date_now].append(incoming_id)
+    #                         if len(my_config.voting_members[date_now]) > my_config.number_team_members:
+    #                             outcoming_text = DICT_MENU['team_allready_exist']
+    #                         else:
+    #                             outcoming_text = DICT_MENU['team_welcome']
+    #                     else:
+    #                         outcoming_text = DICT_MENU['team_member_allready_exist']
+    #                 if incoming_text == '-' and incoming_id in my_config.voting_members[date_now]:
+    #                     my_config.voting_members[date_now].remove(incoming_id)
+    #                     outcoming_text = DICT_MENU['remove_from_team']
+    #                 if '?' == incoming_text[0]:
+    #                     outcoming_text = table_game_team(date_now)
+    #             else:
+    #                 outcoming_text = DICT_MENU['out_of_time']
+    # update_config(PATH_SET, my_config)
     return outcoming_id, outcoming_text
 
 
