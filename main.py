@@ -10,7 +10,7 @@ from viberbot.api.viber_requests import ViberFailedRequest
 from viberbot.api.viber_requests import ViberMessageRequest
 from viberbot.api.viber_requests import ViberSubscribedRequest
 from viberbot.api.viber_requests import ViberUnsubscribedRequest
-from my_config_utilites import *
+from .my_config_utilites import *
 
 
 app = Flask(__name__)
@@ -49,6 +49,12 @@ def incoming():
                 viber.send_messages(output_id, [
                     TextMessage(text=output_msg)
                 ])
+            if END_COUNTDOWN:
+                output_ids, output_msg = incoming_parsing('', '')
+                for output_id in output_ids:
+                    viber.send_messages(output_id, [
+                        TextMessage(text=output_msg)
+                    ])
         else:
             # если не текст, то просто эхо отвечает
             viber.send_messages(viber_request.sender.id, [
