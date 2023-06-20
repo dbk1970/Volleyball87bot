@@ -41,18 +41,19 @@ def incoming():
     if isinstance(viber_request, ViberMessageRequest):
         message = viber_request.message
         # прикручиваем обработку входящего мессаджа
-        if message.message_type == 'text':
-            incoming_text = message.text
+        if message._message_type == 'text':
+            incoming_text = message._text
             incoming_id = viber_request.sender.id
-            output_ids, output_msg = incoming_parsing(incoming_id, incoming_text)
-            for receiver_id in output_ids:
-                viber.send_messages(receiver_id, [
-                    TextMessage(text=output_msg)
-                ])
-            # viber.send_messages(incoming_id, [
-            #         TextMessage(text=str(incoming_text.__dict__)),
-            #         TextMessage(text=str(message.__dict__))
+            # output_ids, output_msg = incoming_parsing(incoming_id, incoming_text)
+            # for receiver_id in output_ids:
+            #     viber.send_messages(receiver_id, [
+            #         TextMessage(text=output_msg)
             #     ])
+            viber.send_messages(incoming_id, [
+                TextMessage(text=str(viber_request.__dict__)),
+                TextMessage(text=str(viber_request.__dir__)),
+                    TextMessage(text=str(message.__dict__))
+                ])
         else:
             # если не текст, то просто эхо отвечает
             viber.send_messages(viber_request.sender.id, [
