@@ -51,7 +51,7 @@ def incoming():
             #     ])
             viber.send_messages(incoming_id, [
                     TextMessage(text=str(incoming_text.__dict__)),
-                    TextMessage(text=str(message.__dict__)
+                    TextMessage(text=str(message.__dict__))
                 ])
         else:
             # если не текст, то просто эхо отвечает
