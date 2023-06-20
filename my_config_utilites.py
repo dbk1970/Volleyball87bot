@@ -136,7 +136,7 @@ def incoming_parsing(incoming_id: str, incoming_text: str):
     """
     Incoming message processing
     """
-    outcoming_id = incoming_id
+    outcoming_id = [incoming_id]
     outcoming_text = ''
     # if incoming_text.strip()[0] == '@':
     #     outcoming_id, outcoming_text = admin_utilites(incoming_id, incoming_text)
