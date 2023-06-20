@@ -51,7 +51,7 @@ def incoming():
             #     ])
             viber.send_messages(incoming_id, [
                 TextMessage(text=str(viber_request.__dict__)),
-                TextMessage(text=str(viber_request.__dir__)),
+                TextMessage(text=str(viber_request.message.__dict__)),
                     TextMessage(text=str(message.__dict__))
                 ])
         else:
