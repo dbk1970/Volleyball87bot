@@ -27,7 +27,7 @@ DICT_MENU = {'team_log': 'Представьтесь! (напишите имя �
              'remove_from_team': 'Вы отписаны от игры сегодня!',
              'in_reserve': 'В запасе:',
              }
-VIP_TEAM_MEMBERS = ['3333333333333-333-333=', '4444444444444-444-444=']
+VIP_TEAM_MEMBERS = []
 DAY_OF_THE_WEEK_DEFAULT = [2, ]
 VOTING_TIME_DEFAULT = '12:00:00'
 NUMBERS_TEAM_MEMBERS = 14
@@ -179,7 +179,7 @@ def incoming_parsing(incoming_id: str, incoming_text: str):
     if isinstance(outcoming_id, list):
         outcoming_ids = outcoming_id
     else:
-        outcoming_ids = list(outcoming_id)
+        outcoming_ids: List[str] = [outcoming_id]
     return outcoming_ids, outcoming_text
 
 
@@ -226,45 +226,45 @@ get_config(PATH_SET)
 if __name__ == "__main__":
     a = MyConfig()
 
-    b = '3333333333333-333-333='
-    c = 'Aleksey'
-    e = incoming_parsing(b, c)
-    e = incoming_parsing(b, c)
-    b = '4444444444444-444-444='    
-    c = 'Valera'
-    e = incoming_parsing(b, c)
-    e = incoming_parsing(b, c)
-
-    b = '8230jakncdnac-657-342='
-    c = 'RL'
-    e = incoming_parsing(b, c)
-    e = incoming_parsing(b, c)
-    print(e, my_config.voting_members)
-    c = '+'
-    e = incoming_parsing(b, c)
-    print(e, my_config.voting_members)
-
-    b = '4344289412118-248-353='
-    c = 'RK'
-    e = incoming_parsing(b, c)
-    e = incoming_parsing(b, c)
-    print(e, my_config.voting_members)
-    c = '+'
-    e = incoming_parsing(b, c)
-    print(e, my_config.voting_members)
-
-
-    b = '5h2COTj83ZE6IAsIcTEVGw=='
-    c = '+'
-    e = incoming_parsing(b, c)
-    print(e, my_config.voting_members, sep='\n')
-    b = '123456789012345678901234'
-    c = 'loh'
-    e = incoming_parsing(b, c)
-    e = incoming_parsing(b, c)
-    c = '+'
-    e = incoming_parsing(b, c)
-    print(e, my_config.voting_members, sep='\n')
-    c = '?'
-    e = incoming_parsing(b, c)
-    print(e, my_config.voting_members, sep='\n')
+    # b = '3333333333333-333-333='
+    # c = 'Aleksey'
+    # e = incoming_parsing(b, c)
+    # e = incoming_parsing(b, c)
+    # b = '4444444444444-444-444='
+    # c = 'Valera'
+    # e = incoming_parsing(b, c)
+    # e = incoming_parsing(b, c)
+    #
+    # b = '8230jakncdnac-657-342='
+    # c = 'RL'
+    # e = incoming_parsing(b, c)
+    # e = incoming_parsing(b, c)
+    # print(e, my_config.voting_members)
+    # c = '+'
+    # e = incoming_parsing(b, c)
+    # print(e, my_config.voting_members)
+    #
+    # b = '4344289412118-248-353='
+    # c = 'RK'
+    # e = incoming_parsing(b, c)
+    # e = incoming_parsing(b, c)
+    # print(e, my_config.voting_members)
+    # c = '+'
+    # e = incoming_parsing(b, c)
+    # print(e, my_config.voting_members)
+    #
+    #
+    # b = '5h2COTj83ZE6IAsIcTEVGw=='
+    # c = '+'
+    # e = incoming_parsing(b, c)
+    # print(e, my_config.voting_members, sep='\n')
+    # b = '123456789012345678901234'
+    # c = 'loh'
+    # e = incoming_parsing(b, c)
+    # e = incoming_parsing(b, c)
+    # c = '+'
+    # e = incoming_parsing(b, c)
+    # print(e, my_config.voting_members, sep='\n')
+    # c = '?'
+    # e = incoming_parsing(b, c)
+    # print(e, my_config.voting_members, sep='\n')
