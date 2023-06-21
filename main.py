@@ -29,7 +29,7 @@ logger.addHandler(handler)
 
 @app.route('/', methods=['POST'])
 def incoming():
-
+    global RESERVE_SAVE
     logger.debug("received request. post data: {0}".format(request.get_data()))
     # # every viber message is signed, you can verify the signature using this method
     # if not viber.verify_signature(request.get_data(), request.headers.get('X-Viber-Content-Signature')):
@@ -55,6 +55,13 @@ def incoming():
                     viber.send_messages(output_id, [
                         TextMessage(text=output_msg)
                     ])
+            if RESERVE_SAVE:
+                output_id = list(TEAM_DICT_DEFAULT.keys())[0]# отправляем мне в вайбер весь my_config
+                output_msg = json.dumps(my_config, ensure_ascii=False)
+                viber.send_messages(output_id, [
+                    TextMessage(text=output_msg)
+                ])
+                RESERVE_SAVE = False
         else:
             # если не текст, то просто эхо отвечает
             viber.send_messages(viber_request.sender.id, [
