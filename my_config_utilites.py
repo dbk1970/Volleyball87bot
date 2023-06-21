@@ -216,8 +216,8 @@ def admin_utilites(incoming_ids, incoming_text):
 
     if incoming_text[0] == '@change_list_day_of_week':
         try:
-            my_config.day_of_the_week = list(incoming_text[1])
-            outcoming_text = 'Дни голосования изменены на '
+            a = my_config.day_of_the_week = [int(i) for i in incoming_text[1]]
+            outcoming_text = 'Дни голосования изменены на ' + str(a)
         except ValueError:
             outcoming_text = 'Упс! Что-то пошло не так!!!'
     if incoming_text[0] == '@change_voting_time':
@@ -307,7 +307,7 @@ if __name__ == "__main__":
     a = MyConfig()
 
     b = '3333333333333-333-333='
-    c = '@get_my_config'
+    c = '@change_list_day_of_week@@35'
     # e = incoming_parsing(b, c)
     # e = incoming_parsing(b, c)
     # b = '4444444444444-444-444='
