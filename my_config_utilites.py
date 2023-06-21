@@ -210,7 +210,7 @@ def admin_utilites(incoming_ids, incoming_text):
     """
     Processing an incoming service message
     """
-    outcoming_ids= incoming_ids
+    outcoming_ids = [incoming_ids]
     outcoming_text = 'Упс! Что-то пошло не так!!!'
     incoming_text = incoming_text.split('@@')
 
