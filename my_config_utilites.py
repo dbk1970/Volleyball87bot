@@ -4,6 +4,7 @@ from typing import Any, List
 from dataclasses import dataclass, field
 import os
 import json
+from unicodedata import normalize
 
 
 PATH_SET = "settings.json"
@@ -172,7 +173,7 @@ def incoming_parsing(incoming_id: str, incoming_text: str):
         else:
             # проверяем на наличие имени в списке команды
             if my_config.team_members[incoming_id] == '':
-                my_config.team_members[incoming_id] = incoming_text
+                my_config.team_members[incoming_id] = normalize('NFC',incoming_text)# вайбер возвращает имя в Unicode
                 outcoming_text = DICT_MENU['team_login'] + incoming_text + '\n' + DICT_MENU['brief_instructions']
             else:
                 # все выше пройдено - читаем меседж
@@ -346,7 +347,7 @@ if __name__ == "__main__":
     # c = '+'
     # e = incoming_parsing(b, c)
     # print(e, my_config.voting_members, sep='\n')
-    c = '@save_my_config@@{"day_of_the_week": ["3", "5"], "voting_time": "00:00:00", "team_members": {"5h2COTj83ZE6IAsIcTEVGw==": "DK", "3333333333333-333-333=": "Aleksey", "4444444444444-444-444=": "Valera", "8230jakncdnac-657-342=": "RL", "4344289412118-248-353=": "RK"}, "voting_members": {"20-06-23": ["3333333333333-333-333=", "4444444444444-444-444=", "8230jakncdnac-657-342=", "4344289412118-248-353=", "5h2COTj83ZE6IAsIcTEVGw==", "123456789012345678901234"], "21-06-23": ["123456789012345678901234"]}, "number_team_members": 6, "vip_team_members": ["3333333333333-333-333=", "4444444444444-444-444="]}'
+    c = '+'
     e, ee = incoming_parsing(b, c)
     print(e, ee, type(ee), my_config, sep='\n')
     # input()
