@@ -4,7 +4,6 @@ from typing import Any, List
 from dataclasses import dataclass, field
 import os
 import json
-from unicodedata import normalize
 
 
 PATH_SET = "settings.json"
@@ -85,7 +84,7 @@ def create_config(path: str):
     config_default = CONFIG_DEFAULT
 
     with open(path, "w") as settings_file:
-        json.dump(config_default, settings_file)
+        json.dump(config_default, settings_file, ensure_ascii=False)
 
 
 def get_config_dict(path: str) -> dict:
@@ -135,7 +134,7 @@ def update_config(path: str, config: MyConfig) -> None:
     my_config_str['number_team_members'] = config.number_team_members
     my_config_str['vip_team_members'] = config.vip_team_members
     with open(path, "w") as settings_file:
-        json.dump(my_config_str, settings_file)
+        json.dump(my_config_str, settings_file, ensure_ascii=False)
 
 
 def delete_setting(path, section, setting):
@@ -173,7 +172,7 @@ def incoming_parsing(incoming_id: str, incoming_text: str):
         else:
             # проверяем на наличие имени в списке команды
             if my_config.team_members[incoming_id] == '':
-                my_config.team_members[incoming_id] = normalize('NFC',incoming_text)# вайбер возвращает имя в Unicode
+                my_config.team_members[incoming_id] = incoming_text
                 outcoming_text = DICT_MENU['team_login'] + incoming_text + '\n' + DICT_MENU['brief_instructions']
             else:
                 # все выше пройдено - читаем меседж
@@ -250,7 +249,7 @@ def admin_utilites(incoming_ids, incoming_text):
         outcoming_text = 'Максимальное количество игроков изменено на '
     if incoming_text[0] == '@get_my_config':
         config = get_config_dict(PATH_SET)
-        outcoming_text = json.dumps(config)
+        outcoming_text = json.dumps(config, ensure_ascii=False)
     if incoming_text[0] == '@save_my_config':
         try:
             json_config = incoming_text[1]
@@ -307,8 +306,8 @@ get_config(PATH_SET)
 if __name__ == "__main__":
     a = MyConfig()
 
-    # b = '3333333333333-333-333='
-    # c = 'Aleksey'
+    b = '3333333333333-333-333='
+    c = '@get_my_config'
     # e = incoming_parsing(b, c)
     # e = incoming_parsing(b, c)
     # b = '4444444444444-444-444='
@@ -339,15 +338,14 @@ if __name__ == "__main__":
     # c = '+'
     # e = incoming_parsing(b, c)
     # print(e, my_config.voting_members, sep='\n')
-
-    b = '5h2COTj83ZE6IAsIcTEVGw=='
+    # b = '5h2COTj83ZE6IAsIcTEVGw=='
     # c = 'loh'
     # e = incoming_parsing(b, c)
     # e = incoming_parsing(b, c)
     # c = '+'
     # e = incoming_parsing(b, c)
     # print(e, my_config.voting_members, sep='\n')
-    c = '+'
+    # c = ''
     e, ee = incoming_parsing(b, c)
     print(e, ee, type(ee), my_config, sep='\n')
     # input()
