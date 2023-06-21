@@ -150,7 +150,7 @@ def incoming_parsing(incoming_id: str, incoming_text: str):
     """
     global END_COUNTDOWN
     outcoming_ids: List = [incoming_id]
-    outcoming_text = ''
+    outcoming_text = 'ошибочная команда'
     date_now = datetime.strftime(datetime.now(), '%d-%m-%y')
     if incoming_text[0] == '@':
         outcoming_ids, outcoming_text = admin_utilites(incoming_id, incoming_text)
@@ -259,7 +259,6 @@ def time_is_true():
     """
     t = my_config.voting_time
     t = t.split(':')
-    print(datetime.now().time(), time(int(t[0]), int(t[1]), int(t[2])))
     return datetime.now().time() > time(int(t[0]), int(t[1]), int(t[2]))
 
 
@@ -331,17 +330,16 @@ if __name__ == "__main__":
     # e = incoming_parsing(b, c)
     # print(e, my_config.voting_members, sep='\n')
 
-    b = '123456789012345678901234'
+    b = '5h2COTj83ZE6IAsIcTEVGw=='
     # c = 'loh'
     # e = incoming_parsing(b, c)
     # e = incoming_parsing(b, c)
     # c = '+'
     # e = incoming_parsing(b, c)
     # print(e, my_config.voting_members, sep='\n')
-    c = '+'
+    c = 'DK'
     e, ee = incoming_parsing(b, c)
-    g = str(datetime.isoweekday(datetime.now())) in my_config.day_of_the_week
-    print(str(datetime.isoweekday(datetime.now())), my_config.day_of_the_week, g, e, ee, my_config.voting_members, sep='\n')
+    print(e, ee, my_config, sep='\n')
     # input()
     # e, ee = incoming_parsing(' ', ' ')
     # print(e, ee, my_config, sep='\n')
