@@ -104,13 +104,16 @@ def get_config_dict(path: str) -> dict:
     return config
 
 
-def get_config(path: str):
+def get_config(path: str, str_config=None) -> None:
     """
     Returns the config object
     """
-    config = get_config_dict(path)
+    if str_config:
+        config = str_config
+    else:
+        config = get_config_dict(path)
     # переводим из dict в объект
-    my_config = MyConfig()
+    # my_config = MyConfig()
     my_config.day_of_the_week = config["day_of_the_week"]
     my_config.voting_time = config["voting_time"]
     my_config.voting_members = config["voting_members"]
@@ -119,19 +122,19 @@ def get_config(path: str):
     my_config.vip_team_members = config['vip_team_members']
 
 
-def update_config(path: str, config: MyConfig):
+def update_config(path: str, config: MyConfig) -> None:
     """
     Update a settings config
     """
-    my_config = CONFIG_DEFAULT
-    my_config['day_of_the_week'] = config.day_of_the_week
-    my_config['voting_time'] = config.voting_time
-    my_config['voting_members'] = config.voting_members
-    my_config['team_members'] = config.team_members
-    my_config['number_team_members'] = config.number_team_members
-    my_config['vip_team_members'] = config.vip_team_members
+    my_config_str = CONFIG_DEFAULT
+    my_config_str['day_of_the_week'] = config.day_of_the_week
+    my_config_str['voting_time'] = config.voting_time
+    my_config_str['voting_members'] = config.voting_members
+    my_config_str['team_members'] = config.team_members
+    my_config_str['number_team_members'] = config.number_team_members
+    my_config_str['vip_team_members'] = config.vip_team_members
     with open(path, "w") as settings_file:
-        json.dump(my_config, settings_file)
+        json.dump(my_config_str, settings_file)
 
 
 def delete_setting(path, section, setting):
@@ -208,8 +211,8 @@ def admin_utilites(incoming_ids, incoming_text):
     Processing an incoming service message
     """
     outcoming_ids= incoming_ids
-    outcoming_text = incoming_text
-    incoming_text = incoming_text.split()
+    outcoming_text = 'Упс! Что-то пошло не так!!!'
+    incoming_text = incoming_text.split('@@')
 
     if incoming_text[0] == '@change_list_day_of_week':
         try:
@@ -227,7 +230,7 @@ def admin_utilites(incoming_ids, incoming_text):
             deleted = my_config.team_members.pop(incoming_text[1], 'Никто не')
             outcoming_text = str(deleted) + ' \n удален из членов команды'
         except IndexError:
-            outcoming_text = 'Упс! Что-то пошло не так!!!'
+            pass
     if incoming_text[0] == '@save_team_members':
         outcoming_text = ' \n внесен в члены команды'
     if incoming_text[0] == '@get_voting_members':
@@ -246,9 +249,15 @@ def admin_utilites(incoming_ids, incoming_text):
         outcoming_text = 'Максимальное количество игроков изменено на '
     if incoming_text[0] == '@get_my_config':
         config = get_config_dict(PATH_SET)
-        outcoming_text = '***my_config***\n' + str(config)
+        outcoming_text = json.dumps(config)
     if incoming_text[0] == '@save_my_config':
-        outcoming_text = 'OK'
+        try:
+            json_config = incoming_text[1]
+            config = json.loads(json_config)
+            get_config(PATH_SET, str_config=config)
+            outcoming_text = 'OK'
+        except ValueError:
+            pass
     update_config(PATH_SET, my_config)
     return outcoming_ids, outcoming_text
 
@@ -337,10 +346,10 @@ if __name__ == "__main__":
     # c = '+'
     # e = incoming_parsing(b, c)
     # print(e, my_config.voting_members, sep='\n')
-    c = 'DK'
+    c = '@save_my_config@@{"day_of_the_week": ["3", "5"], "voting_time": "00:00:00", "team_members": {"5h2COTj83ZE6IAsIcTEVGw==": "DK", "3333333333333-333-333=": "Aleksey", "4444444444444-444-444=": "Valera", "8230jakncdnac-657-342=": "RL", "4344289412118-248-353=": "RK"}, "voting_members": {"20-06-23": ["3333333333333-333-333=", "4444444444444-444-444=", "8230jakncdnac-657-342=", "4344289412118-248-353=", "5h2COTj83ZE6IAsIcTEVGw==", "123456789012345678901234"], "21-06-23": ["123456789012345678901234"]}, "number_team_members": 6, "vip_team_members": ["3333333333333-333-333=", "4444444444444-444-444="]}'
     e, ee = incoming_parsing(b, c)
-    print(e, ee, my_config, sep='\n')
+    print(e, ee, type(ee), my_config, sep='\n')
     # input()
     # e, ee = incoming_parsing(' ', ' ')
-    # print(e, ee, my_config, sep='\n')
+    # print(e, ee, type(ee), my_config, sep='\n')
 
