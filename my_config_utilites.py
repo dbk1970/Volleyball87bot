@@ -83,7 +83,7 @@ def create_config(path: str):
 
     config_default = CONFIG_DEFAULT
 
-    with open(path, "w") as settings_file:
+    with open(path, "w", encoding='utf8') as settings_file:
         json.dump(config_default, settings_file, ensure_ascii=False)
 
 
@@ -94,12 +94,12 @@ def get_config_dict(path: str) -> dict:
     if not os.path.exists(path):
         create_config(path)
     try:
-        with open(PATH_SET) as settings_file:
+        with open(PATH_SET, encoding='utf8') as settings_file:
             config = json.load(settings_file)
         # проверяем файл на исправность данных, если нет - создаем снова по дефолту
     except ValueError:
         create_config(path)
-        with open(PATH_SET) as settings_file:
+        with open(PATH_SET, encoding='utf8') as settings_file:
             config = json.load(settings_file)
     return config
 
@@ -133,18 +133,8 @@ def update_config(path: str, config: MyConfig) -> None:
     my_config_str['team_members'] = config.team_members
     my_config_str['number_team_members'] = config.number_team_members
     my_config_str['vip_team_members'] = config.vip_team_members
-    with open(path, "w") as settings_file:
+    with open(path, "w", encoding='utf8') as settings_file:
         json.dump(my_config_str, settings_file, ensure_ascii=False)
-
-
-def delete_setting(path, section, setting):
-    """
-    Delete a setting НЕ РАБОТАЕТ
-    """
-    config = get_config(path)
-    config.remove_option(section, setting)
-    with open(path, "w") as config_file:
-        config.write(config_file)
 
 
 def incoming_parsing(incoming_id: str, incoming_text: str):
@@ -180,7 +170,7 @@ def incoming_parsing(incoming_id: str, incoming_text: str):
                     if date_now not in my_config.voting_members:
                         # при первом обращении в нужное время - создаем запись голосующих с внесением первыми VIP
                         my_config.voting_members[date_now] = []
-                        for vip_members in VIP_TEAM_MEMBERS:
+                        for vip_members in my_config.vip_team_members:
                             my_config.voting_members[date_now].append(vip_members)
                     if '+' in incoming_text:
                         if incoming_id not in my_config.voting_members[date_now]:
@@ -275,7 +265,7 @@ def weekday_is_true():
     """
     Checking for condition compliance by weekday
     """
-    return str(datetime.isoweekday(datetime.now())) in my_config.day_of_the_week
+    return datetime.isoweekday(datetime.now()) in my_config.day_of_the_week
 
 
 def table_game_team(date: str):
@@ -306,8 +296,8 @@ get_config(PATH_SET)
 if __name__ == "__main__":
     a = MyConfig()
 
-    b = '3333333333333-333-333='
-    c = '@change_list_day_of_week@@35'
+    b = '5h2COTj83ZE6IAsIcTEVGw=='
+    c = '@change_list_day_of_week@@2'
     # e = incoming_parsing(b, c)
     # e = incoming_parsing(b, c)
     # b = '4444444444444-444-444='
