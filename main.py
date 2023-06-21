@@ -10,7 +10,7 @@ from viberbot.api.viber_requests import ViberFailedRequest
 from viberbot.api.viber_requests import ViberMessageRequest
 from viberbot.api.viber_requests import ViberSubscribedRequest
 from viberbot.api.viber_requests import ViberUnsubscribedRequest
-from .my_config_utilites import *
+from my_config_utilites import *
 
 
 app = Flask(__name__)
