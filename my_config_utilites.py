@@ -50,15 +50,17 @@ VOTING_TIME_DEFAULT = '12:00:00'
 NUMBERS_TEAM_MEMBERS = 14
 TEAM_DICT_DEFAULT = {'5h2COTj83ZE6IAsIcTEVGw==': 'DK'}
 VOTING_MEMBERS = {}
+END_COUNTDOWN = False # флаг окончания набора команды
+RESERVE_SAVE = False # флаг создания резервной копии my_config (т.к. на сервере нельзя сохранить файл м\д деплоями)
 CONFIG_DEFAULT = {"day_of_the_week": DAY_OF_THE_WEEK_DEFAULT,
                   "voting_time": VOTING_TIME_DEFAULT,
                   "team_members": TEAM_DICT_DEFAULT,
                   'voting_members': VOTING_MEMBERS,
                   'number_team_members': NUMBERS_TEAM_MEMBERS,
                   'vip_team_members': VIP_TEAM_MEMBERS,
+                  'end_countdown': END_COUNTDOWN,
+                  'reserve_save': RESERVE_SAVE,
                   }
-END_COUNTDOWN = False
-RESERVE_SAVE = False
 
 
 @dataclass
@@ -69,6 +71,8 @@ class MyConfig:
     voting_members: dict = field(default_factory=dict)
     number_team_members: int = 14
     vip_team_members: List[str] = field(default_factory=list)
+    end_countdown: bool = False
+    reserve_save: bool = False
 
     def __post_init__(self):
         my_config_json = get_config_dict(PATH_SET)
@@ -78,6 +82,8 @@ class MyConfig:
         self.voting_members = my_config_json['voting_members']
         self.number_team_members = my_config_json['number_team_members']
         self.vip_team_members = my_config_json['vip_team_members']
+        self.end_countdown = my_config_json['end_countdown']
+        self.reserve_save = my_config_json['reserve_save']
 
 
 def create_config(path: str):
@@ -122,6 +128,8 @@ def get_config(path: str, str_config=None) -> None:
     my_config.team_members = config["team_members"]
     my_config.number_team_members = int(config['number_team_members'])
     my_config.vip_team_members = config['vip_team_members']
+    my_config.end_countdown = config['end_countdown']
+    my_config.reserve_save = config['reserve_save']
 
 
 def update_config(path: str, config: MyConfig) -> None:
@@ -135,6 +143,8 @@ def update_config(path: str, config: MyConfig) -> None:
     my_config_str['team_members'] = config.team_members
     my_config_str['number_team_members'] = config.number_team_members
     my_config_str['vip_team_members'] = config.vip_team_members
+    my_config_str['end_countdown'] = config.end_countdown
+    my_config_str['reserve_save'] = config.reserve_save
     with open(path, "w", encoding='utf8') as settings_file:
         json.dump(my_config_str, settings_file, ensure_ascii=False)
 
@@ -143,15 +153,13 @@ def incoming_parsing(incoming_id: str, incoming_text: str):
     """
     Incoming message processing
     """
-    global END_COUNTDOWN
-    global RESERVE_SAVE
     outcoming_ids: List = [incoming_id]
     outcoming_text = 'ошибочная команда'
     date_now = datetime.strftime(datetime.now(), '%d-%m-%y')
     if incoming_text[0] == '@':
         outcoming_ids, outcoming_text = admin_utilites(incoming_id, incoming_text)
     else:
-        if END_COUNTDOWN:
+        if my_config.end_countdown:
             outcoming_ids = table_id_team(date_now)
             if len(my_config.voting_members[date_now]) == my_config.number_team_members:
                 outcoming_text = table_game_team(date_now) + '\n' + DICT_MENU['team_exist']
@@ -159,18 +167,18 @@ def incoming_parsing(incoming_id: str, incoming_text: str):
                 outcoming_text = table_game_team(date_now)
 
         # проверяем на наличие id в списке команды
-        if incoming_id not in my_config.team_members and not END_COUNTDOWN:
+        if incoming_id not in my_config.team_members and not my_config.end_countdown:
             my_config.team_members[incoming_id] = ''
             outcoming_text = DICT_MENU['team_log']
             if (len(my_config.team_members) in [10,15,20,25]) or (len(my_config.team_members) > 25):
-                RESERVE_SAVE = True
+                my_config.reserve_save = True
         else:
             # проверяем на наличие имени в списке команды
             if my_config.team_members[incoming_id] == '':
                 my_config.team_members[incoming_id] = incoming_text
                 outcoming_text = DICT_MENU['team_login'] + incoming_text + '\n' + DICT_MENU['brief_instructions']
                 if (len(my_config.team_members) in [10, 15, 20, 25]) or (len(my_config.team_members) > 25):
-                    RESERVE_SAVE = True
+                    my_config.reserve_save = True
             else:
                 # все выше пройдено - читаем меседж
                 if weekday_is_true() and time_is_true():
@@ -198,9 +206,11 @@ def incoming_parsing(incoming_id: str, incoming_text: str):
                         outcoming_text = table_game_team(date_now)
                 else:
                     outcoming_text = DICT_MENU['out_of_time']
-        if (date_now in my_config.voting_members and len(my_config.voting_members[date_now]) == my_config.number_team_members and not END_COUNTDOWN
-            and incoming_text != '?') or (not END_COUNTDOWN and incoming_text == '-'):
-            END_COUNTDOWN = not END_COUNTDOWN
+        if (date_now in my_config.voting_members
+            and len(my_config.voting_members[date_now]) == my_config.number_team_members
+            and not my_config.end_countdown
+            and incoming_text != '?') or (not my_config.end_countdown and incoming_text == '-'):
+            my_config.end_countdown = not my_config.end_countdown
     update_config(PATH_SET, my_config)
     return outcoming_ids, outcoming_text
 
@@ -261,7 +271,7 @@ def admin_utilites(incoming_ids, incoming_text):
         outcoming_text = 'Максимальное количество игроков изменено на '
     if incoming_text[0] == '@get_my_config':
         config = get_config_dict(PATH_SET)
-        outcoming_text = json.dumps(my_config, ensure_ascii=False)
+        outcoming_text = json.dumps(config, ensure_ascii=False)
     if incoming_text[0] == '@save_my_config':
         try:
             json_config = incoming_text[1]
@@ -316,47 +326,23 @@ def table_id_team(date: str) -> List:
     return table_list
 
 
-def reserve_save_config():
-    pass
-
-
 my_config: Any = MyConfig()
 get_config(PATH_SET)
 
 if __name__ == "__main__":
     a = MyConfig()
-    b = '3333333333333-333-333='
-    c = '@get_my_config'
-    # e = incoming_parsing(b, c)
-    # e = incoming_parsing(b, c)
+    # b = '3333333333333-333-333='
+    # c = 'Лёша'
+
     # b = '4444444444444-444-444='
     # c = 'Valera'
-    # e = incoming_parsing(b, c)
-    # e = incoming_parsing(b, c)
-    #
-    # b = '8230jakncdnac-657-342='
-    # c = 'RL'
-    # e = incoming_parsing(b, c)
-    # e = incoming_parsing(b, c)
-    # print(e, my_config.voting_members)
-    # c = '+'
-    # e = incoming_parsing(b, c)
-    # print(e, my_config.voting_members)
-    #
+
+    b = '8230jakncdnac-657-342='
+    c = 'RL'
+
     # b = '4344289412118-248-353='
     # c = 'RK'
-    # e = incoming_parsing(b, c)
-    # e = incoming_parsing(b, c)
-    # print(e, my_config.voting_members)
-    # c = '+'
-    # e = incoming_parsing(b, c)
-    # print(e, my_config.voting_members)
-    #
-    #
-    # b = '5h2COTj83ZE6IAsIcTEVGw=='
-    # c = '+'
-    # e = incoming_parsing(b, c)
-    # print(e, my_config.voting_members, sep='\n')
+
     # b = '5h2COTj83ZE6IAsIcTEVGw=='
 
     e, ee = incoming_parsing(b, c)
