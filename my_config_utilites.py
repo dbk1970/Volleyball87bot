@@ -7,6 +7,7 @@ import json
 
 
 PATH_SET = "settings.json"
+if __name__ == "__main__": PATH_SET = "settings_.json"  #для отладки
 NAME_BOT = 'Volleyball78bot'
 AVATAR_BOT = 'mikasa_or_molten.jpg'
 AUTH_TOKEN = '50ee0ec538a7dc83-f5d7265684ea6499-2995774239081905'
@@ -17,7 +18,9 @@ DICT_MENU = {'team_log': 'Представьтесь! (напишите имя �
              'brief_instructions': 'Краткие инструкции по общению с ботом: \n'
                                    '+ - запись на игру \n'
                                    '- - отказаться от игры (если записались ранее) \n'
-                                   '? - получить список сегодняшней команды',
+                                   '? - получить список сегодняшней команды \n'
+                                   '@- - отписаться от бота \n'
+                                   '@help - получить эту страничку',
              'team_member_allready_exist': 'Вы уже записаны на игру ',
              'out_of_time': 'Сегодня нет игры',
              'team_exist': 'Комплект!',
@@ -55,6 +58,7 @@ CONFIG_DEFAULT = {"day_of_the_week": DAY_OF_THE_WEEK_DEFAULT,
                   'vip_team_members': VIP_TEAM_MEMBERS,
                   }
 END_COUNTDOWN = False
+RESERVE_SAVE = False
 
 
 @dataclass
@@ -80,9 +84,7 @@ def create_config(path: str):
     """
     Create a config file
     """
-
     config_default = CONFIG_DEFAULT
-
     with open(path, "w", encoding='utf8') as settings_file:
         json.dump(config_default, settings_file, ensure_ascii=False)
 
@@ -142,6 +144,7 @@ def incoming_parsing(incoming_id: str, incoming_text: str):
     Incoming message processing
     """
     global END_COUNTDOWN
+    global RESERVE_SAVE
     outcoming_ids: List = [incoming_id]
     outcoming_text = 'ошибочная команда'
     date_now = datetime.strftime(datetime.now(), '%d-%m-%y')
@@ -159,11 +162,15 @@ def incoming_parsing(incoming_id: str, incoming_text: str):
         if incoming_id not in my_config.team_members and not END_COUNTDOWN:
             my_config.team_members[incoming_id] = ''
             outcoming_text = DICT_MENU['team_log']
+            if (len(my_config.team_members) in [10,15,20,25]) or (len(my_config.team_members) > 25):
+                RESERVE_SAVE = True
         else:
             # проверяем на наличие имени в списке команды
             if my_config.team_members[incoming_id] == '':
                 my_config.team_members[incoming_id] = incoming_text
                 outcoming_text = DICT_MENU['team_login'] + incoming_text + '\n' + DICT_MENU['brief_instructions']
+                if (len(my_config.team_members) in [10, 15, 20, 25]) or (len(my_config.team_members) > 25):
+                    RESERVE_SAVE = True
             else:
                 # все выше пройдено - читаем меседж
                 if weekday_is_true() and time_is_true():
@@ -183,6 +190,8 @@ def incoming_parsing(incoming_id: str, incoming_text: str):
                             outcoming_text = DICT_MENU['team_member_allready_exist']
                     if incoming_text == '-' and incoming_id in my_config.voting_members[date_now]:
                         my_config.voting_members[date_now].remove(incoming_id)
+                        if len(my_config.voting_members[date_now]) < 1:
+                            my_config.voting_members.pop(date_now)
                         outcoming_text = DICT_MENU['remove_from_team']
 
                     if  incoming_text == '?':
@@ -204,23 +213,36 @@ def admin_utilites(incoming_ids, incoming_text):
     outcoming_text = 'Упс! Что-то пошло не так!!!'
     incoming_text = incoming_text.split('@@')
 
-    if incoming_text[0] == '@change_list_day_of_week':
+    if incoming_text[0] == '@change_list_day_of_week' and len(incoming_text) != 1:
         try:
             a = my_config.day_of_the_week = [int(i) for i in incoming_text[1]]
             outcoming_text = 'Дни голосования изменены на ' + str(a)
         except ValueError:
             outcoming_text = 'Упс! Что-то пошло не так!!!'
-    if incoming_text[0] == '@change_voting_time':
-        outcoming_text = 'Время голосования изменено на '
+    if incoming_text[0] == '@change_voting_time' and len(incoming_text) != 1:
+        a = my_config.voting_time = incoming_text[1]
+        outcoming_text = 'Время голосования изменено на ' + a
     if incoming_text[0] == '@get_team_members':
-
         outcoming_text = 'Зарегистрированные члены команды: \n'
-    if incoming_text[0] == '@delete_team_members':
-        try:
-            deleted = my_config.team_members.pop(incoming_text[1], 'Никто не')
-            outcoming_text = str(deleted) + ' \n удален из членов команды'
-        except IndexError:
-            pass
+        i = 0
+        for key, item in my_config.team_members.items():
+            i += 1
+            outcoming_text += str(i) + ' - ' + item + '\n'
+    if incoming_text[0] == '@-':# удаление из общего списка команды
+        if len(incoming_text) == 1:
+            try:
+                deleted = my_config.team_members.pop(incoming_ids, 'Никто не')
+                outcoming_text = str(deleted) + ' \n удален из членов команды'
+            except IndexError:
+                pass
+        else:
+            try:
+                outcoming_text = ''
+                for delete_id in incoming_ids:
+                    deleted = my_config.team_members.pop(delete_id, 'Никто не')
+                    outcoming_text += str(deleted) + ' \n удален из членов команды'
+            except IndexError:
+                pass
     if incoming_text[0] == '@save_team_members':
         outcoming_text = ' \n внесен в члены команды'
     if incoming_text[0] == '@get_voting_members':
@@ -239,7 +261,7 @@ def admin_utilites(incoming_ids, incoming_text):
         outcoming_text = 'Максимальное количество игроков изменено на '
     if incoming_text[0] == '@get_my_config':
         config = get_config_dict(PATH_SET)
-        outcoming_text = json.dumps(config, ensure_ascii=False)
+        outcoming_text = json.dumps(my_config, ensure_ascii=False)
     if incoming_text[0] == '@save_my_config':
         try:
             json_config = incoming_text[1]
@@ -274,9 +296,13 @@ def table_game_team(date: str):
     """
     table_str = ''
     for i in range(len(my_config.voting_members[date])):
-        if i == my_config.number_team_members:
+        if i == my_config.number_team_members:#  проверка на полноту команды
             table_str += DICT_MENU['in_reserve'] + '\n '
-        table_str += str(i + 1) + ' : ' + my_config.team_members[my_config.voting_members[date][i]] + '\n '
+        if my_config.voting_members[date][i] in my_config.team_members:# если участник игры не удалился из общего списка
+            table_member = my_config.team_members[my_config.voting_members[date][i]]
+        else:
+            table_member = ''
+        table_str += str(i + 1) + ' : ' + table_member + '\n '
     return table_str
 
 
@@ -290,14 +316,17 @@ def table_id_team(date: str) -> List:
     return table_list
 
 
+def reserve_save_config():
+    pass
+
+
 my_config: Any = MyConfig()
 get_config(PATH_SET)
 
 if __name__ == "__main__":
     a = MyConfig()
-
-    b = '5h2COTj83ZE6IAsIcTEVGw=='
-    c = '@change_list_day_of_week@@2'
+    b = '3333333333333-333-333='
+    c = '@get_my_config'
     # e = incoming_parsing(b, c)
     # e = incoming_parsing(b, c)
     # b = '4444444444444-444-444='
@@ -329,16 +358,8 @@ if __name__ == "__main__":
     # e = incoming_parsing(b, c)
     # print(e, my_config.voting_members, sep='\n')
     # b = '5h2COTj83ZE6IAsIcTEVGw=='
-    # c = 'loh'
-    # e = incoming_parsing(b, c)
-    # e = incoming_parsing(b, c)
-    # c = '+'
-    # e = incoming_parsing(b, c)
-    # print(e, my_config.voting_members, sep='\n')
-    # c = ''
+
     e, ee = incoming_parsing(b, c)
     print(e, ee, type(ee), my_config, sep='\n')
-    # input()
-    # e, ee = incoming_parsing(' ', ' ')
-    # print(e, ee, type(ee), my_config, sep='\n')
-
+    # проверить рассылку всем достижении 14 и проверить рассылку запасным при минусовании гоглибо из основного
+    # help прикрутить и в него допом добавить еще чего нить, облегчить ввод мембертим
