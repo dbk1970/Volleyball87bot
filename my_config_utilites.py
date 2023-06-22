@@ -22,7 +22,7 @@ DICT_MENU = {'team_log': 'Представьтесь! (напишите имя �
                                    '@- - отписаться от бота \n'
                                    '@help - получить эту страничку',
              'team_member_allready_exist': 'Вы уже записаны на игру ',
-             'out_of_time': 'Сегодня нет игры',
+             'out_of_time': 'Не сейчас!!!',
              'team_exist': 'Комплект!',
              'team_already_exist': 'Команда сформирована! На сегодня вы - в запасе.',
              'team_welcome': 'Вы зарегистрированы! Добро пожаловать на игру!',
@@ -191,7 +191,7 @@ def incoming_parsing(incoming_id: str, incoming_text: str):
                         if incoming_id not in my_config.voting_members[date_now]:
                             my_config.voting_members[date_now].append(incoming_id)
                             if len(my_config.voting_members[date_now]) > my_config.number_team_members:
-                                outcoming_text = DICT_MENU['team_allready_exist']
+                                outcoming_text = DICT_MENU['team_already_exist']
                             else:
                                 outcoming_text = DICT_MENU['team_welcome']
                         else:
@@ -202,15 +202,22 @@ def incoming_parsing(incoming_id: str, incoming_text: str):
                             my_config.voting_members.pop(date_now)
                         outcoming_text = DICT_MENU['remove_from_team']
 
-                    if  incoming_text == '?':
+                    if incoming_text == '?':
+                        if my_config.end_countdown:
+                            outcoming_ids = my_config.voting_members[date_now]
+                            my_config.reserve_save = False
                         outcoming_text = table_game_team(date_now)
+
+                    if (date_now in my_config.voting_members
+                        and len(my_config.voting_members[date_now]) == my_config.number_team_members
+                        and not my_config.end_countdown
+                        and incoming_text != '?') or \
+                        (len(my_config.voting_members[date_now]) == my_config.number_team_members and
+                        not my_config.end_countdown and incoming_text == '-'):
+                        my_config.end_countdown = True
+                        # при достжении нужного кол-ва игроков вызываем рассылку всем сообщения
                 else:
                     outcoming_text = DICT_MENU['out_of_time']
-        if (date_now in my_config.voting_members
-            and len(my_config.voting_members[date_now]) == my_config.number_team_members
-            and not my_config.end_countdown
-            and incoming_text != '?') or (not my_config.end_countdown and incoming_text == '-'):
-            my_config.end_countdown = not my_config.end_countdown
     update_config(PATH_SET, my_config)
     return outcoming_ids, outcoming_text
 
@@ -269,6 +276,8 @@ def admin_utilites(incoming_ids, incoming_text):
         outcoming_text = ' \n внесен в VIP список'
     if incoming_text[0] == '@change_number_team_members':
         outcoming_text = 'Максимальное количество игроков изменено на '
+    if incoming_text[0] == '@help':
+        outcoming_text = DICT_MENU['brief_instructions']
     if incoming_text[0] == '@get_my_config':
         config = get_config_dict(PATH_SET)
         outcoming_text = json.dumps(config, ensure_ascii=False)
@@ -331,21 +340,23 @@ get_config(PATH_SET)
 
 if __name__ == "__main__":
     a = MyConfig()
-    # b = '3333333333333-333-333='
+    b = '3333333333333-333-333='
     # c = 'Лёша'
 
     # b = '4444444444444-444-444='
     # c = 'Valera'
 
-    b = '8230jakncdnac-657-342='
-    c = 'RL'
+    # b = '8230jakncdnac-657-342='
+    # c = 'RL'
 
-    # b = '4344289412118-248-353='
+    b = '4344289412118-248-353='
     # c = 'RK'
 
     # b = '5h2COTj83ZE6IAsIcTEVGw=='
-
+    # b = '?'
+    c = '@help'
     e, ee = incoming_parsing(b, c)
     print(e, ee, type(ee), my_config, sep='\n')
+
     # проверить рассылку всем достижении 14 и проверить рассылку запасным при минусовании гоглибо из основного
     # help прикрутить и в него допом добавить еще чего нить, облегчить ввод мембертим
