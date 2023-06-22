@@ -99,13 +99,11 @@ def get_config_dict(path: str) -> dict:
     """
     Returns the config dict
     """
-    if not os.path.exists(path):
-        create_config(path)
     try:
         with open(PATH_SET, encoding='utf8') as settings_file:
             config = json.load(settings_file)
         # проверяем файл на исправность данных, если нет - создаем снова по дефолту
-    except ValueError:
+    except Exception:
         create_config(path)
         with open(PATH_SET, encoding='utf8') as settings_file:
             config = json.load(settings_file)
