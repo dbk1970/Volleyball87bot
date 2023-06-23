@@ -22,7 +22,7 @@ DICT_MENU = {'team_log': 'Представьтесь! (напишите имя �
                                    '@- - отписаться от бота \n'
                                    'help - получить эту страничку',
              'team_member_allready_exist': 'Вы уже записаны на игру ',
-             'out_of_time': 'Не сейчас!!!',
+             'out_of_time': 'Не сейчас!!! \n Начало переклички по :',
              'team_exist': 'Комплект!',
              'team_already_exist': 'Команда сформирована! На сегодня вы - в запасе.',
              'team_welcome': 'Вы зарегистрированы! Добро пожаловать на игру!',
@@ -62,7 +62,7 @@ CONFIG_DEFAULT = {"day_of_the_week": DAY_OF_THE_WEEK_DEFAULT,
                   'end_countdown': END_COUNTDOWN,
                   'reserve_save': RESERVE_SAVE,
                   }
-
+WEEK = ['понедельник', 'вторник', 'среда', 'четверг', 'пятница', 'суббота', 'воскресенье']
 
 @dataclass
 class MyConfig:
@@ -120,7 +120,6 @@ def get_config(path: str, str_config=None) -> None:
     else:
         config = get_config_dict(path)
     # переводим из dict в объект
-    # my_config = MyConfig()
     my_config.day_of_the_week = config["day_of_the_week"]
     my_config.voting_time = config["voting_time"]
     my_config.voting_members = config["voting_members"]
@@ -208,7 +207,9 @@ def incoming_parsing(incoming_id: str, incoming_text: str):
                         my_config.end_countdown = not my_config.end_countdown
                         # при достжении нужного кол-ва игроков вызываем рассылку всем сообщения
                 else:
-                    outcoming_text = DICT_MENU['out_of_time']
+                    outcoming_text = DICT_MENU['out_of_time'] + '\n'
+                    for day_week in my_config.day_of_the_week:
+                        outcoming_text += WEEK[day_week-1] + ' -  в ' + str(my_config.voting_time) + '\n'
     update_config(PATH_SET, my_config)
     return outcoming_ids, outcoming_text
 
@@ -272,7 +273,7 @@ def admin_utilites(incoming_ids, incoming_text):
         outcoming_text = DICT_MENU['brief_instructions']
     if incoming_text[0] == '@get_my_config':
         config = get_config_dict(PATH_SET)
-        outcoming_text = '@save_my_config' + json.dumps(config, ensure_ascii=False)
+        outcoming_text = '@save_my_config@@' + json.dumps(config, ensure_ascii=False)
     if incoming_text[0] == '@save_my_config':
         try:
             json_config = incoming_text[1]
