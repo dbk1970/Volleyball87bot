@@ -4,6 +4,7 @@ from typing import Any, List
 from dataclasses import dataclass, field
 import os
 import json
+from pytz import timezone
 
 
 PATH_SET = "settings.json"
@@ -22,7 +23,7 @@ DICT_MENU = {'team_log': 'Представьтесь! (напишите имя �
                                    '@- - отписаться от бота \n'
                                    'help - получить эту страничку',
              'team_member_allready_exist': 'Вы уже записаны на игру ',
-             'out_of_time': 'Не сейчас!!! \n Начало переклички по :',
+             'out_of_time': 'Не сейчас!!! \n Начало переклички :',
              'team_exist': 'Комплект!',
              'team_already_exist': 'Команда сформирована! На сегодня вы - в запасе.',
              'team_welcome': 'Вы зарегистрированы! Добро пожаловать на игру!',
@@ -292,7 +293,7 @@ def time_is_true():
     """
     t = my_config.voting_time
     t = t.split(':')
-    return datetime.now().time() > time(int(t[0]), int(t[1]), int(t[2]))
+    return datetime.now(timezone("Europe/Samara")).time() > time(int(t[0]), int(t[1]), int(t[2]))
 
 
 def weekday_is_true():
@@ -338,13 +339,13 @@ if __name__ == "__main__":
     # b = '3333333333333-333-333='
     # c = 'Лёша'
 
-    # b = '4444444444444-444-444='
+    b = '4444444444444-444-444='
     # c = 'Valera'
 
     # b = '8230jakncdnac-657-342='
     # c = 'RL'
 
-    b = '00002852524234240000='
+    # b = '00002852524234240000='
     # c = 'RK'
 
     # b = '5h2COTj83ZE6IAsIcTEVGw=='
@@ -352,14 +353,14 @@ if __name__ == "__main__":
     c = '+'
     e, ee = incoming_parsing(b, c)
     print(e, ee, type(ee), my_config, sep='\n')
-    input()
-    c = '?'
-    e, ee = incoming_parsing(b, c)
-    print(e, ee, type(ee), my_config, sep='\n')
-    input()
-    c = '-'
-    e, ee = incoming_parsing(b, c)
-    print(e, ee, type(ee), my_config, sep='\n')
+    # input()
+    # c = '?'
+    # e, ee = incoming_parsing(b, c)
+    # print(e, ee, type(ee), my_config, sep='\n')
+    # input()
+    # c = '-'
+    # e, ee = incoming_parsing(b, c)
+    # print(e, ee, type(ee), my_config, sep='\n')
     c = 'ghdcacq'
     # проверить рассылку всем достижении 14 и проверить рассылку запасным при минусовании гоглибо из основного
     # help прикрутить и в него допом добавить еще чего нить, облегчить ввод мембертим
