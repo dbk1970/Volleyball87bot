@@ -293,7 +293,7 @@ def time_is_true():
     """
     t = my_config.voting_time
     t = t.split(':')
-    dt = timedelta(hours=3)
+    dt = timedelta(hours=4)
     return (datetime.now() + dt).time() > time(int(t[0])-3, int(t[1]), int(t[2]))
     # return datetime.now(timezone("Europe/Samara")).time() > time(int(t[0]), int(t[1]), int(t[2]))
     # пришлось делать костыли тк  ModuleNotFoundError: No module named 'pytz'
@@ -302,7 +302,7 @@ def weekday_is_true():
     """
     Checking for condition compliance by weekday
     """
-    dt = timedelta(hours=3)
+    dt = timedelta(hours=4)
     return datetime.isoweekday(datetime.now() + dt) in my_config.day_of_the_week
 
 
