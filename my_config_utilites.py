@@ -275,8 +275,8 @@ def admin_utilites(incoming_ids, incoming_text):
         outcoming_text = '@save_my_config' + json.dumps(config, ensure_ascii=False)
     if incoming_text[0] == '@save_my_config':
         try:
-            config = incoming_text[1]
-            # config = json.loads(json_config)
+            json_config = incoming_text[1]
+            config = json.loads(json_config)
             get_config(PATH_SET, str_config=config)
             outcoming_text = 'OK'
         except ValueError:
