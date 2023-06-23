@@ -1,4 +1,4 @@
-from datetime import datetime, time
+from datetime import datetime, time, timezone, timedelta
 # from pytz import timezone
 from time import strftime
 from typing import Any, List
@@ -293,7 +293,8 @@ def time_is_true():
     """
     t = my_config.voting_time
     t = t.split(':')
-    return datetime.now().time() > time(int(t[0])-3, int(t[1]), int(t[2]))
+    dt = timedelta(hours=3)
+    return (datetime.now() + dt).time() > time(int(t[0])-3, int(t[1]), int(t[2]))
     # return datetime.now(timezone("Europe/Samara")).time() > time(int(t[0]), int(t[1]), int(t[2]))
     # пришлось делать костыли тк  ModuleNotFoundError: No module named 'pytz'
     # и  Pip - Fatal error in launcher: Unable to create process using
@@ -301,7 +302,8 @@ def weekday_is_true():
     """
     Checking for condition compliance by weekday
     """
-    return datetime.isoweekday(datetime.now()) in my_config.day_of_the_week
+    dt = timedelta(hours=3)
+    return datetime.isoweekday(datetime.now() + dt) in my_config.day_of_the_week
 
 
 def table_game_team(date: str):
