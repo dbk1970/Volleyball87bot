@@ -20,7 +20,7 @@ DICT_MENU = {'team_log': 'Представьтесь! (напишите имя �
                                    '- - отказаться от игры (если записались ранее) \n'
                                    '? - получить список сегодняшней команды \n'
                                    '@- - отписаться от бота \n'
-                                   '@help - получить эту страничку',
+                                   'help - получить эту страничку',
              'team_member_allready_exist': 'Вы уже записаны на игру ',
              'out_of_time': 'Не сейчас!!!',
              'team_exist': 'Комплект!',
@@ -28,6 +28,7 @@ DICT_MENU = {'team_log': 'Представьтесь! (напишите имя �
              'team_welcome': 'Вы зарегистрированы! Добро пожаловать на игру!',
              'remove_from_team': 'Вы отписаны от игры сегодня!',
              'in_reserve': 'В запасе:',
+             'wrong_command': 'ошибочная команда',
              }
 ADMIN_DICT = {'@change_list_day_of_week': 'Дни голосования изменены на ',
               '@change_voting_time': 'Время голосования изменено на ',
@@ -152,23 +153,17 @@ def incoming_parsing(incoming_id: str, incoming_text: str):
     Incoming message processing
     """
     outcoming_ids: List = [incoming_id]
-    outcoming_text = 'ошибочная команда'
+    outcoming_text = DICT_MENU['wrong_command']
     date_now = datetime.strftime(datetime.now(), '%d-%m-%y')
-    if incoming_text[0] == '@':
+    # разделяем на два блока - служебные команд (с @ в заголовке) и блок с регистрацией и голосование(+,-)/регистрация
+    if incoming_text[0] == '@' or incoming_text == 'help' or incoming_text == 'Help':
         outcoming_ids, outcoming_text = admin_utilites(incoming_id, incoming_text)
     else:
-        if my_config.end_countdown:
-            outcoming_ids = table_id_team(date_now)
-            if len(my_config.voting_members[date_now]) == my_config.number_team_members:
-                outcoming_text = table_game_team(date_now) + '\n' + DICT_MENU['team_exist']
-            else:
-                outcoming_text = table_game_team(date_now)
-
         # проверяем на наличие id в списке команды
-        if incoming_id not in my_config.team_members and not my_config.end_countdown:
+        if incoming_id not in my_config.team_members:
             my_config.team_members[incoming_id] = ''
             outcoming_text = DICT_MENU['team_log']
-            if (len(my_config.team_members) in [10,15,20,25]) or (len(my_config.team_members) > 25):
+            if (len(my_config.team_members) in [5, 10, 15, 20, 25]) or (len(my_config.team_members) > 25):
                 my_config.reserve_save = True
         else:
             # проверяем на наличие имени в списке команды
@@ -185,7 +180,7 @@ def incoming_parsing(incoming_id: str, incoming_text: str):
                         my_config.voting_members[date_now] = []
                         for vip_members in my_config.vip_team_members:
                             my_config.voting_members[date_now].append(vip_members)
-                    if '+' in incoming_text:
+                    if '+' in incoming_text and len(incoming_text) < 4:
                         if incoming_id not in my_config.voting_members[date_now]:
                             my_config.voting_members[date_now].append(incoming_id)
                             if len(my_config.voting_members[date_now]) > my_config.number_team_members:
@@ -194,6 +189,7 @@ def incoming_parsing(incoming_id: str, incoming_text: str):
                                 outcoming_text = DICT_MENU['team_welcome']
                         else:
                             outcoming_text = DICT_MENU['team_member_allready_exist']
+
                     if incoming_text == '-' and incoming_id in my_config.voting_members[date_now]:
                         my_config.voting_members[date_now].remove(incoming_id)
                         if len(my_config.voting_members[date_now]) < 1:
@@ -201,18 +197,15 @@ def incoming_parsing(incoming_id: str, incoming_text: str):
                         outcoming_text = DICT_MENU['remove_from_team']
 
                     if incoming_text == '?':
+                        outcoming_text = table_game_team(date_now)
                         if my_config.end_countdown:
                             outcoming_ids = my_config.voting_members[date_now]
-                            my_config.reserve_save = False
-                        outcoming_text = table_game_team(date_now)
+                            outcoming_text = table_game_team(date_now) + '\n' + DICT_MENU['team_exist']
+                            my_config.end_countdown = False
 
-                    if (date_now in my_config.voting_members
-                        and len(my_config.voting_members[date_now]) == my_config.number_team_members
-                        and not my_config.end_countdown
-                        and incoming_text != '?') or \
-                        (len(my_config.voting_members[date_now]) == my_config.number_team_members and
-                        not my_config.end_countdown and incoming_text == '-'):
-                        my_config.end_countdown = True
+                    if len(my_config.voting_members[date_now]) == my_config.number_team_members \
+                            and incoming_text != '?' and not my_config.end_countdown:
+                        my_config.end_countdown = not my_config.end_countdown
                         # при достжении нужного кол-ва игроков вызываем рассылку всем сообщения
                 else:
                     outcoming_text = DICT_MENU['out_of_time']
@@ -243,7 +236,8 @@ def admin_utilites(incoming_ids, incoming_text):
         for key, item in my_config.team_members.items():
             i += 1
             outcoming_text += str(i) + ' - ' + item + '\n'
-    if incoming_text[0] == '@-':# удаление из общего списка команды
+    if incoming_text[0] == '@-':
+        # удаление из общего списка команды
         if len(incoming_text) == 1:
             try:
                 deleted = my_config.team_members.pop(incoming_ids, 'Никто не')
@@ -274,15 +268,15 @@ def admin_utilites(incoming_ids, incoming_text):
         outcoming_text = ' \n внесен в VIP список'
     if incoming_text[0] == '@change_number_team_members':
         outcoming_text = 'Максимальное количество игроков изменено на '
-    if incoming_text[0] == '@help':
+    if incoming_text[0] == 'help':
         outcoming_text = DICT_MENU['brief_instructions']
     if incoming_text[0] == '@get_my_config':
         config = get_config_dict(PATH_SET)
-        outcoming_text = json.dumps(config, ensure_ascii=False)
+        outcoming_text = '@save_my_config' + json.dumps(config, ensure_ascii=False)
     if incoming_text[0] == '@save_my_config':
         try:
-            json_config = incoming_text[1]
-            config = json.loads(json_config)
+            config = incoming_text[1]
+            # config = json.loads(json_config)
             get_config(PATH_SET, str_config=config)
             outcoming_text = 'OK'
         except ValueError:
@@ -313,9 +307,11 @@ def table_game_team(date: str):
     """
     table_str = ''
     for i in range(len(my_config.voting_members[date])):
-        if i == my_config.number_team_members:#  проверка на полноту команды
+        if i == my_config.number_team_members:
+            #  проверка на полноту команды
             table_str += DICT_MENU['in_reserve'] + '\n '
-        if my_config.voting_members[date][i] in my_config.team_members:# если участник игры не удалился из общего списка
+        if my_config.voting_members[date][i] in my_config.team_members:
+            # если участник игры не удалился из общего списка
             table_member = my_config.team_members[my_config.voting_members[date][i]]
         else:
             table_member = ''
@@ -338,7 +334,7 @@ get_config(PATH_SET)
 
 if __name__ == "__main__":
     a = MyConfig()
-    b = '3333333333333-333-333='
+    # b = '3333333333333-333-333='
     # c = 'Лёша'
 
     # b = '4444444444444-444-444='
@@ -347,14 +343,22 @@ if __name__ == "__main__":
     # b = '8230jakncdnac-657-342='
     # c = 'RL'
 
-    b = '4344289412118-248-353='
+    b = '00002852524234240000='
     # c = 'RK'
 
     # b = '5h2COTj83ZE6IAsIcTEVGw=='
     # b = '?'
-    c = '@help'
+    c = '+'
     e, ee = incoming_parsing(b, c)
     print(e, ee, type(ee), my_config, sep='\n')
-
+    input()
+    c = '?'
+    e, ee = incoming_parsing(b, c)
+    print(e, ee, type(ee), my_config, sep='\n')
+    input()
+    c = '-'
+    e, ee = incoming_parsing(b, c)
+    print(e, ee, type(ee), my_config, sep='\n')
+    c = 'ghdcacq'
     # проверить рассылку всем достижении 14 и проверить рассылку запасным при минусовании гоглибо из основного
     # help прикрутить и в него допом добавить еще чего нить, облегчить ввод мембертим

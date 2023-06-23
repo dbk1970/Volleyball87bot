@@ -49,20 +49,22 @@ def incoming():
                     TextMessage(text=output_msg)
                 ])
             if my_config.end_countdown:
+                # создаем дополнительное сообщение при окончании набора
                 output_ids, output_msg = incoming_parsing(list(TEAM_DICT_DEFAULT.keys())[0], '?')
                 # id мой просто чтобы не было ошибки
                 for output_id in output_ids:
                     viber.send_messages(output_id, [
                         TextMessage(text=output_msg)
                     ])
-                my_config.end_countdown = False
             if my_config.reserve_save:
-                output_id = list(TEAM_DICT_DEFAULT.keys())[0]# отправляем мне в вайбер весь my_config
+                # создаем дополнительное сообщение администратору при регистрации новых игроков
+                # отправляем мне в вайбер весь my_config
+                output_id = list(TEAM_DICT_DEFAULT.keys())[0]
                 output_msg = json.dumps(my_config, ensure_ascii=False)
                 viber.send_messages(output_id, [
                     TextMessage(text=output_msg)
                 ])
-                # my_config.reserve_save = False
+                my_config.reserve_save = False
         else:
             # если не текст, то просто эхо отвечает
             viber.send_messages(viber_request.sender.id, [
