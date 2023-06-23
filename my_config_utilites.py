@@ -1,10 +1,10 @@
 from datetime import datetime, time
+from pytz import timezone
 from time import strftime
 from typing import Any, List
 from dataclasses import dataclass, field
 import os
 import json
-from pytz import timezone
 
 
 PATH_SET = "settings.json"
