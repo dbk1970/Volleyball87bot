@@ -154,7 +154,8 @@ def incoming_parsing(incoming_id: str, incoming_text: str):
     """
     outcoming_ids: List = [incoming_id]
     outcoming_text = DICT_MENU['wrong_command']
-    date_now = datetime.strftime(datetime.now(), '%d-%m-%y')
+    dt = timedelta(hours=4)
+    date_now = datetime.strftime(datetime.utcnow() + dt, '%d-%m-%y')
     # разделяем на два блока - служебные команд (с @ в заголовке) и блок с регистрацией и голосование(+,-)/регистрация
     if incoming_text[0] == '@' or incoming_text == 'help' or incoming_text == 'Help':
         outcoming_ids, outcoming_text = admin_utilites(incoming_id, incoming_text)
@@ -294,7 +295,7 @@ def time_is_true():
     t = my_config.voting_time
     t = t.split(':')
     dt = timedelta(hours=4)
-    return (datetime.now() + dt).time() > time(int(t[0]), int(t[1]), int(t[2]))
+    return (datetime.utcnow() + dt).time() > time(int(t[0]), int(t[1]), int(t[2]))
     # return datetime.now(timezone("Europe/Samara")).time() > time(int(t[0]), int(t[1]), int(t[2]))
     # пришлось делать костыли тк  ModuleNotFoundError: No module named 'pytz'
     # и  Pip - Fatal error in launcher: Unable to create process using
@@ -303,7 +304,7 @@ def weekday_is_true():
     Checking for condition compliance by weekday
     """
     dt = timedelta(hours=4)
-    return datetime.isoweekday(datetime.now() + dt) in my_config.day_of_the_week
+    return datetime.isoweekday(datetime.utcnow() + dt) in my_config.day_of_the_week
 
 
 def table_game_team(date: str):
