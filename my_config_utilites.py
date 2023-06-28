@@ -8,7 +8,7 @@ import json
 
 
 PATH_SET = "settings.json"
-if __name__ == "__main__": PATH_SET = "settings_.json"  #для отладки
+# if __name__ == "__main__": PATH_SET = "settings_.json"  #для отладки
 NAME_BOT = 'Volleyball78bot'
 AVATAR_BOT = 'mikasa_or_molten.jpg'
 AUTH_TOKEN = '50ee0ec538a7dc83-f5d7265684ea6499-2995774239081905'
@@ -354,7 +354,7 @@ if __name__ == "__main__":
 
     # b = '5h2COTj83ZE6IAsIcTEVGw=='
     # b = '?'
-    c = '+'
+    c = '@get_my_config'
     e, ee = incoming_parsing(b, c)
     print(e, ee, type(ee), my_config, sep='\n')
     # input()
