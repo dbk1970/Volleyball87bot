@@ -112,14 +112,11 @@ def get_config_dict(path: str) -> dict:
     return config
 
 
-def get_config(path: str, my_config: MyConfig, str_config=None) -> None:
+def get_config(path: str) -> MyConfig:
     """
     Returns the config object
     """
-    if str_config:
-        config = str_config
-    else:
-        config = get_config_dict(path)
+    config = get_config_dict(path)
     # переводим из dict в объект
     my_config.day_of_the_week = config["day_of_the_week"]
     my_config.voting_time = config["voting_time"]
@@ -129,6 +126,7 @@ def get_config(path: str, my_config: MyConfig, str_config=None) -> None:
     my_config.vip_team_members = config['vip_team_members']
     my_config.end_countdown = config['end_countdown']
     my_config.reserve_save = config['reserve_save']
+    return my_config
 
 
 def update_config(path: str, config: MyConfig) -> None:
@@ -228,7 +226,7 @@ def admin_utilites(incoming_ids, incoming_text):
         try:
             json_config = incoming_text[1]
             config = json.loads(json_config)
-            get_config(PATH_SET, my_config, str_config=config)
+            get_config(PATH_SET, str_config=config)
             outcoming_text = 'OK'
         except Exception:
             pass
@@ -323,7 +321,7 @@ def table_id_team(date: str) -> List:
     return table_list
 
 
-# my_config: Any = MyConfig()
+my_config: Any = MyConfig()
 # get_config(PATH_SET)
 
 if __name__ == "__main__":
