@@ -112,11 +112,14 @@ def get_config_dict(path: str) -> dict:
     return config
 
 
-def get_config(path: str) -> MyConfig:
+def get_config(path: str, str_config=None) -> MyConfig:
     """
     Returns the config object
     """
-    config = get_config_dict(path)
+    if str_config:
+        config = str_config
+    else:
+        config = get_config_dict(path)
     # переводим из dict в объект
     my_config.day_of_the_week = config["day_of_the_week"]
     my_config.voting_time = config["voting_time"]
@@ -226,7 +229,7 @@ def admin_utilites(incoming_ids, incoming_text):
         try:
             json_config = incoming_text[1]
             config = json.loads(json_config)
-            get_config(PATH_SET, str_config=config)
+            my_config = get_config(PATH_SET, str_config=config)
             outcoming_text = 'OK'
         except Exception:
             pass
