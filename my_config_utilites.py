@@ -213,7 +213,7 @@ def incoming_parsing(incoming_id: str, incoming_text: str):
                     for day_week in my_config.day_of_the_week:
                         outcoming_text += WEEK[day_week-1] + ' -  в ' + str(my_config.voting_time) + '\n'
     update_config(PATH_SET, my_config)
-    return outcoming_ids, outcoming_text, my_config
+    return outcoming_ids, outcoming_text
 
 
 def admin_utilites(incoming_ids, incoming_text):
@@ -228,7 +228,7 @@ def admin_utilites(incoming_ids, incoming_text):
         try:
             json_config = incoming_text[1]
             config = json.loads(json_config)
-            get_config(PATH_SET, str_config=config)
+            get_config(PATH_SET, my_config, str_config=config)
             outcoming_text = 'OK'
         except Exception:
             pass
