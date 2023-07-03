@@ -159,7 +159,7 @@ def incoming_parsing(incoming_id: str, incoming_text: str):
     date_now = datetime.strftime(datetime.utcnow() + dt, '%d-%m-%y')
     # разделяем на два блока - служебные команд (с @ в заголовке) и блок с регистрацией и голосование(+,-)/регистрация
     if incoming_text[0] == '@' or incoming_text == 'help' or incoming_text == 'Help':
-        outcoming_ids, outcoming_text = admin_utilites(incoming_id, incoming_text)
+        outcoming_ids, outcoming_text = admin_utilites(incoming_id, incoming_text, my_config)
     else:
         # проверяем на наличие id в списке команды
         if incoming_id not in my_config.team_members:
@@ -217,53 +217,58 @@ def incoming_parsing(incoming_id: str, incoming_text: str):
     return outcoming_ids, outcoming_text
 
 
-def admin_utilites(incoming_ids, incoming_text):
+def admin_utilites(incoming_ids, incoming_text, config_u):
     """
     Processing an incoming service message
     """
     outcoming_ids = [incoming_ids]
     outcoming_text = 'Упс! Что-то пошло не так!!!'
     incoming_text = incoming_text.split('@@')
+    my_config_ultra = config_u
 
     if incoming_text[0] == '@save_my_config':
         try:
             json_config = incoming_text[1]
             config = json.loads(json_config)
-            my_config = get_config(PATH_SET, str_config=config)
+            my_config_ultra = get_config(PATH_SET, str_config=config)
             outcoming_text = 'OK'
+            update_config(PATH_SET, my_config_ultra)
         except Exception:
             pass
     if incoming_text[0] == '@change_list_day_of_week' and len(incoming_text) != 1:
         try:
-            a = my_config.day_of_the_week = [int(i) for i in incoming_text[1]]
+            a = my_config_ultra.day_of_the_week = [int(i) for i in incoming_text[1]]
+            update_config(PATH_SET, my_config_ultra)
             outcoming_text = 'Дни голосования изменены на ' + str(a)
         except Exception:
             pass
     if incoming_text[0] == '@change_voting_time' and len(incoming_text) != 1:
-        a = my_config.voting_time = incoming_text[1]
+        a = my_config_ultra.voting_time = incoming_text[1]
+        update_config(PATH_SET, my_config_ultra)
         outcoming_text = 'Время голосования изменено на ' + a
     if incoming_text[0] == '@-':
         # удаление из общего списка команды
         if len(incoming_text) == 1:
             try:
-                deleted = my_config.team_members.pop(incoming_ids, 'Никто не')
+                deleted = my_config_ultra.team_members.pop(incoming_ids, 'Никто не')
                 outcoming_text = str(deleted) + ' \n удален из членов команды'
+                update_config(PATH_SET, my_config_ultra)
             except Exception:
                 pass
         else:
             try:
                 outcoming_text = ''
                 for delete_id in incoming_ids:
-                    deleted = my_config.team_members.pop(delete_id, 'Никто не')
+                    deleted = my_config_ultra.team_members.pop(delete_id, 'Никто не')
                     outcoming_text += str(deleted) + ' \n удален из членов команды'
+                    update_config(PATH_SET, my_config_ultra)
             except Exception:
                 pass
-    update_config(PATH_SET, my_config)
 
     if incoming_text[0] == '@get_team_members':
         outcoming_text = 'Зарегистрированные члены команды: \n'
         i = 0
-        for key, item in my_config.team_members.items():
+        for key, item in my_config_ultra.team_members.items():
             i += 1
             outcoming_text += str(i) + ' - ' + item + '\n'
     if incoming_text[0] == 'help':
