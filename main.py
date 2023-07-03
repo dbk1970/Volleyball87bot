@@ -26,6 +26,8 @@ formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(messag
 handler.setFormatter(formatter)
 logger.addHandler(handler)
 
+my_config: Any = MyConfig()
+get_config(PATH_SET, my_config)
 
 @app.route('/', methods=['POST'])
 def incoming():
@@ -43,7 +45,7 @@ def incoming():
         if message._message_type == 'text':
             incoming_text = message._text
             incoming_id = viber_request.sender.id
-            output_ids, output_msg = incoming_parsing(incoming_id, incoming_text)
+            output_ids, output_msg= incoming_parsing(incoming_id, incoming_text)
             for output_id in output_ids:
                 viber.send_messages(output_id, [
                     TextMessage(text=output_msg)
@@ -78,8 +80,6 @@ def incoming():
         logger.warning("client failed receiving message. failure: {0}".format(viber_request))
 
     return Response(status=200)
-
-
 
 
 
